@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase cli local cache
+supabase/.temp/
+
+# claude code local settings (machine-specific paths)
+CLAUDE.md
+.claude/
+.agents/
+skills-lock.json
+
+travel-album-*.*
+*.sql

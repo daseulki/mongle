@@ -1,26 +1,139 @@
 @import "tailwindcss";
+@import "../../public/travel-album-design-system.css" layer(base);
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ── Design system color utilities ── */
+  --color-cream: var(--color-bg-app);
+  --color-card: var(--color-bg-card);
+  --color-surface: var(--color-bg-surface);
+  --color-amber: var(--color-amber);
+  --color-amber-light: var(--color-amber-light);
+  --color-amber-dark: var(--color-amber-dark);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-light: var(--color-terracotta-light);
+  --color-sage: var(--color-sage);
+  --color-sky: var(--color-sky);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-disabled: var(--color-ink-disabled);
+
+  /* ── Font mappings ── */
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-display);
+
+  /* ── shadcn semantic color mappings ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Radius — exact design system values ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-4xl: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Form input (legacy class, kept for backwards compat) ── */
+.form-input {
+  height: var(--touch-comfort);
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  background-color: var(--color-bg-card);
+  color: var(--color-ink);
+  width: 100%;
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+.form-input:focus {
+  border-color: var(--color-amber);
+}
+.form-input::placeholder {
+  color: var(--color-ink-disabled);
+}
+
+/* ── Spinner keyframe ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── shadcn semantic variables — mapped to design system tokens ── */
+:root {
+  --background: #F5F0E8;
+  --foreground: #2C2416;
+  --card: #FFFFFF;
+  --card-foreground: #2C2416;
+  --popover: #FFFFFF;
+  --popover-foreground: #2C2416;
+  --primary: #B85C38;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EDE6D6;
+  --secondary-foreground: #5C4F3A;
+  --muted: #EDE6D6;
+  --muted-foreground: #8A7A64;
+  --accent: #FBF0DC;
+  --accent-foreground: #9A5E22;
+  --destructive: #DC2626;
+  --border: rgba(44, 36, 22, 0.10);
+  --input: rgba(44, 36, 22, 0.22);
+  --ring: #C4813A;
+  --radius: 10px;
+  --chart-1: #C4813A;
+  --chart-2: #B85C38;
+  --chart-3: #7A9E7E;
+  --chart-4: #6B9DC2;
+  --chart-5: #8B6FA4;
+  --sidebar: #F5F0E8;
+  --sidebar-foreground: #2C2416;
+  --sidebar-primary: #B85C38;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FBF0DC;
+  --sidebar-accent-foreground: #9A5E22;
+  --sidebar-border: rgba(44, 36, 22, 0.10);
+  --sidebar-ring: #C4813A;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
 }
