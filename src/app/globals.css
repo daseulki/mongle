@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../../public/travel-album-design-system.css" layer(base);
+@import "./design-system.css" layer(base);
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
