@@ -80,19 +80,20 @@ async function fetchArchive(
   return data.daily
 }
 
-// Open-Meteo Geocoding API
+// Nominatim (OpenStreetMap) — 한글 포함 다국어 지명 지원
 async function geocode(name: string): Promise<{ lat: number; lng: number } | null> {
-  const url = new URL('https://geocoding-api.open-meteo.com/v1/search')
-  url.searchParams.set('name', name)
-  url.searchParams.set('count', '1')
-  url.searchParams.set('language', 'ko')
+  const url = new URL('https://nominatim.openstreetmap.org/search')
+  url.searchParams.set('q', name)
   url.searchParams.set('format', 'json')
+  url.searchParams.set('limit', '1')
 
-  const res = await fetch(url.toString())
+  const res = await fetch(url.toString(), {
+    headers: { 'User-Agent': 'mongle-trip/1.0 (travel album app)' },
+  })
   if (!res.ok) return null
-  const data = (await res.json()) as { results?: { latitude: number; longitude: number }[] }
-  if (!data.results?.length) return null
-  return { lat: data.results[0].latitude, lng: data.results[0].longitude }
+  const data = (await res.json()) as { lat: string; lon: string }[]
+  if (!data.length) return null
+  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
 }
 
 // ─── 메인 ────────────────────────────────────────────────────────────────────

@@ -180,6 +180,8 @@ export async function updateAlbum(albumId: string, input: unknown): Promise<Upda
       start_date: startDate,
       end_date: endDate,
       destination_name: destinationName || null,
+      destination_lat: null,
+      destination_lng: null,
       ...(coverImageUrl !== undefined ? { cover_image_url: coverImageUrl } : {}),
     })
     .eq('id', albumId)

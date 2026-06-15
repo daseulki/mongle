@@ -45,7 +45,7 @@ export default async function EditItineraryPage({
     albumId: row.album_id,
     date: row.date,
     placeName: row.place_name,
-    scheduledTime: row.scheduled_time,
+    scheduledTime: row.scheduled_time?.slice(0, 5) ?? null,
     memo: row.memo,
     orderIndex: row.order_index,
     createdBy: row.created_by,
