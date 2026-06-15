@@ -89,6 +89,7 @@ export function PhotoGrid({ photos, albumId, myUserId }: PhotoGridProps): React.
         toast.success('사진이 삭제됐어요')
         setSelectedPhotoId(null)
         await queryClient.invalidateQueries({ queryKey: photoKeys.byAlbum(albumId) })
+        router.refresh()
       } else {
         toast.error(result.error)
       }

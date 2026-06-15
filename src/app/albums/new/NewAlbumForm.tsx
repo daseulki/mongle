@@ -6,12 +6,15 @@ import { useForm } from 'react-hook-form'
 import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { toast } from 'sonner'
 import { CopyIcon, CheckIcon } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ImageUploadPicker } from '@/components/ui/ImageUploadPicker'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { createAlbum, type CreateAlbumInput } from '@/actions/album'
 import { generateInviteLink } from '@/actions/invite'
+import { albumKeys } from '@/queries/keys'
 
 function InviteBottomSheet({
   inviteUrl,
@@ -120,9 +123,11 @@ function InviteBottomSheet({
 
 export function NewAlbumForm(): React.JSX.Element {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
   const [createdAlbumId, setCreatedAlbumId] = useState<string | null>(null)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
 
   const {
     register,
@@ -140,7 +145,7 @@ export function NewAlbumForm(): React.JSX.Element {
 
   function onSubmit(values: CreateAlbumInput): void {
     startTransition(async () => {
-      const result = await createAlbum(values)
+      const result = await createAlbum({ ...values, coverImageUrl: coverImageUrl ?? undefined })
       if (!result || !result.success) {
         toast.error(result?.error ?? '앨범 생성에 실패했어요')
         return
@@ -148,6 +153,7 @@ export function NewAlbumForm(): React.JSX.Element {
 
       const albumId = result.albumId
       setCreatedAlbumId(albumId)
+      await queryClient.invalidateQueries({ queryKey: albumKeys.list() })
 
       // Generate invite link automatically after creation
       const inviteResult = await generateInviteLink(albumId)
@@ -181,6 +187,14 @@ export function NewAlbumForm(): React.JSX.Element {
           noValidate
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
         >
+          {/* 커버 이미지 */}
+          <ImageUploadPicker
+            type="cover"
+            currentUrl={coverImageUrl}
+            onChange={setCoverImageUrl}
+            aspectRatio="16/7"
+          />
+
           {/* 여행 이름 */}
           <Input
             label="여행 이름"

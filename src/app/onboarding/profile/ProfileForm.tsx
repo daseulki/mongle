@@ -1,17 +1,20 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { createUserProfile, type ProfileFormState } from '@/actions/profile'
+import { ImageUploadPicker } from '@/components/ui/ImageUploadPicker'
 
 type Props = {
   defaultNickname: string
+  googleAvatarUrl: string | null
 }
 
-export function ProfileForm({ defaultNickname }: Props): React.JSX.Element {
+export function ProfileForm({ defaultNickname, googleAvatarUrl }: Props): React.JSX.Element {
   const [state, formAction, isPending] = useActionState<ProfileFormState, FormData>(
     createUserProfile,
     null,
   )
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(googleAvatarUrl)
 
   return (
     <div
@@ -27,18 +30,30 @@ export function ProfileForm({ defaultNickname }: Props): React.JSX.Element {
         {/* 헤더 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <h1 className="text-display-lg" style={{ color: 'var(--color-ink)' }}>
-            닉네임을 설정해주세요
+            프로필을 설정해주세요
           </h1>
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)' }}>
-            여행 앨범에서 사용할 이름이에요
+            여행 앨범에서 사용할 이름과 사진이에요
           </p>
         </div>
 
         {/* 폼 */}
         <form
           action={formAction}
-          style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
         >
+          {/* 아바타 */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ImageUploadPicker
+              type="avatar"
+              currentUrl={avatarUrl}
+              onChange={setAvatarUrl}
+              avatarSize={88}
+            />
+          </div>
+          {/* avatarUrl을 FormData로 전달 */}
+          <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
             <label
               htmlFor="nickname"

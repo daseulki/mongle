@@ -9,6 +9,7 @@ export type CreateAlbumInput = {
   startDate: string
   endDate: string
   destinationName?: string
+  coverImageUrl?: string
 }
 
 const createAlbumSchema = z
@@ -27,6 +28,7 @@ const createAlbumSchema = z
       .min(1, '종료일을 선택해주세요')
       .regex(/^\d{4}-\d{2}-\d{2}$/, '올바른 날짜를 선택해주세요'),
     destinationName: z.string().trim().max(50, '50자 이하로 입력해주세요').optional(),
+    coverImageUrl: z.string().url().optional(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: '종료일이 시작일보다 빨라요',
@@ -61,7 +63,7 @@ export async function createAlbum(input: unknown): Promise<CreateAlbumState> {
   }
 
   const { client, user } = auth
-  const { title, startDate, endDate, destinationName } = result.data
+  const { title, startDate, endDate, destinationName, coverImageUrl } = result.data
 
   // UUID를 미리 생성해 .select() 체이닝을 제거:
   // INSERT ... RETURNING은 albums_select_member(fn_is_album_member) 정책도 요구하는데,
@@ -77,6 +79,7 @@ export async function createAlbum(input: unknown): Promise<CreateAlbumState> {
       start_date: startDate,
       end_date: endDate,
       destination_name: destinationName || null,
+      cover_image_url: coverImageUrl ?? null,
     })
 
   if (albumError) {
@@ -105,6 +108,7 @@ export type UpdateAlbumInput = {
   startDate: string
   endDate: string
   destinationName?: string
+  coverImageUrl?: string | null
 }
 
 const updateAlbumSchema = z
@@ -123,6 +127,7 @@ const updateAlbumSchema = z
       .min(1, '종료일을 선택해주세요')
       .regex(/^\d{4}-\d{2}-\d{2}$/, '올바른 날짜를 선택해주세요'),
     destinationName: z.string().trim().max(50, '50자 이하로 입력해주세요').optional(),
+    coverImageUrl: z.string().url().nullable().optional(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: '종료일이 시작일보다 빨라요',
@@ -166,7 +171,7 @@ export async function updateAlbum(albumId: string, input: unknown): Promise<Upda
     return { success: false, error: '앨범 설정을 변경할 권한이 없어요' }
   }
 
-  const { title, startDate, endDate, destinationName } = result.data
+  const { title, startDate, endDate, destinationName, coverImageUrl } = result.data
 
   const { error } = await client
     .from('albums')
@@ -175,6 +180,7 @@ export async function updateAlbum(albumId: string, input: unknown): Promise<Upda
       start_date: startDate,
       end_date: endDate,
       destination_name: destinationName || null,
+      ...(coverImageUrl !== undefined ? { cover_image_url: coverImageUrl } : {}),
     })
     .eq('id', albumId)
 

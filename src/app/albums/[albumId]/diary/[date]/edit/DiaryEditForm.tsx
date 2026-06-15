@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { Trash2Icon } from 'lucide-react'
@@ -20,6 +20,10 @@ type FormValues = {
   content: string
 }
 
+function draftKey(albumId: string, date: string): string {
+  return `draft:diary:${albumId}:${date}`
+}
+
 export function DiaryEditForm({
   albumId,
   date,
@@ -28,17 +32,62 @@ export function DiaryEditForm({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const isEdit = !!existingEntry
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<FormValues>({
     defaultValues: { content: existingEntry?.content ?? '' },
   })
 
   const content = watch('content')
+
+  // 마운트 시: localStorage draft 확인 → 복원 제안
+  useEffect(() => {
+    const key = draftKey(albumId, date)
+    const saved = localStorage.getItem(key)
+    if (!saved) return
+    // 기존 저장된 일기와 같으면 draft 무시
+    if (existingEntry && saved === existingEntry.content) {
+      localStorage.removeItem(key)
+      return
+    }
+    // 현재 폼 값과 같으면 무시
+    if (saved === (existingEntry?.content ?? '')) return
+
+    toast('임시 저장된 일기가 있어요', {
+      duration: 6000,
+      action: {
+        label: '불러오기',
+        onClick: () => {
+          setValue('content', saved)
+          toast.success('임시 저장 내용을 불러왔어요')
+        },
+      },
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // content 변경 시 1s debounce 자동 저장
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      const key = draftKey(albumId, date)
+      if (content.trim()) {
+        localStorage.setItem(key, content)
+      } else {
+        localStorage.removeItem(key)
+      }
+    }, 1000)
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [content, albumId, date])
 
   function onSubmit(values: FormValues): void {
     startTransition(async () => {
@@ -53,6 +102,8 @@ export function DiaryEditForm({
         return
       }
 
+      // 저장 성공 시 draft 삭제
+      localStorage.removeItem(draftKey(albumId, date))
       toast.success(isEdit ? '일기를 수정했어요' : '일기를 저장했어요')
       router.push(`/albums/${albumId}/memories`)
     })
@@ -65,6 +116,7 @@ export function DiaryEditForm({
         toast.error(result.error)
         return
       }
+      localStorage.removeItem(draftKey(albumId, date))
       toast.success('일기를 삭제했어요')
       router.push(`/albums/${albumId}/memories`)
     })

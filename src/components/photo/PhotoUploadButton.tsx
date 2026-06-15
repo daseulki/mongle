@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,6 +20,7 @@ interface PhotoUploadButtonProps {
 }
 
 export function PhotoUploadButton({ albumId, disabled = false }: PhotoUploadButtonProps): React.JSX.Element {
+  const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [isPending, startTransition] = useTransition()
   const queryClient = useQueryClient()
@@ -126,6 +128,7 @@ export function PhotoUploadButton({ albumId, disabled = false }: PhotoUploadButt
 
       if (successCount > 0) {
         await queryClient.invalidateQueries({ queryKey: photoKeys.byAlbum(albumId) })
+        router.refresh()
         toast.success(`${successCount}장 업로드 완료`)
       }
       if (failCount > 0) {

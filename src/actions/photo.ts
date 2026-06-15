@@ -1,6 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createActionClient } from '@/lib/supabase/server'
 
@@ -66,7 +65,6 @@ export async function insertPhoto(
 
   if (error || !data) return { success: false, error: '사진 저장에 실패했어요' }
 
-  revalidatePath(`/albums/${albumId}/memories`)
   return { success: true, photoId: data.id }
 }
 
@@ -100,6 +98,5 @@ export async function deletePhoto(
 
   if (error) return { success: false, error: '사진 삭제에 실패했어요' }
 
-  revalidatePath(`/albums/${albumId}/memories`)
   return { success: true }
 }

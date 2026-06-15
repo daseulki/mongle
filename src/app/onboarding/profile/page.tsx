@@ -13,5 +13,10 @@ export default async function OnboardingProfilePage(): Promise<React.JSX.Element
   const defaultNickname =
     (user.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? ''
 
-  return <ProfileForm defaultNickname={defaultNickname} />
+  const googleAvatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ??
+    (user.user_metadata?.picture as string | undefined) ??
+    null
+
+  return <ProfileForm defaultNickname={defaultNickname} googleAvatarUrl={googleAvatarUrl} />
 }

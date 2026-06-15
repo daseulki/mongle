@@ -12,6 +12,10 @@ export function createR2Client(): S3Client {
       accessKeyId: process.env.R2_ACCESS_KEY_ID!,
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     },
+    // AWS SDK v3는 기본적으로 CRC32 체크섬을 presigned URL에 포함시키는데,
+    // 브라우저 PUT 시 빈 체크섬 값으로 서명되어 R2가 검증을 거부한다.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
   })
 }
 

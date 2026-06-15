@@ -1,10 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { updateProfile, type UpdateProfileState } from '@/actions/profile'
+import { ImageUploadPicker } from '@/components/ui/ImageUploadPicker'
 
 interface ProfileSettingsFormProps {
   nickname: string
@@ -15,13 +16,14 @@ interface ProfileSettingsFormProps {
 export function ProfileSettingsForm({
   nickname,
   email,
-  avatarUrl,
+  avatarUrl: avatarUrl_prop,
 }: ProfileSettingsFormProps): React.JSX.Element {
   const router = useRouter()
   const [state, formAction, isPending] = useActionState<UpdateProfileState, FormData>(
     updateProfile,
     null,
   )
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(avatarUrl_prop)
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -36,39 +38,12 @@ export function ProfileSettingsForm({
     >
       {/* 프로필 이미지 */}
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 'var(--space-2)' }}>
-        <div
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 'var(--radius-4xl)',
-            overflow: 'hidden',
-            background: 'var(--color-bg-surface)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt="프로필 이미지"
-              width={80}
-              height={80}
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <span
-              style={{
-                fontSize: 32,
-                fontWeight: 700,
-                color: 'var(--color-ink-soft)',
-              }}
-            >
-              {nickname.charAt(0)}
-            </span>
-          )}
-        </div>
+        <ImageUploadPicker
+          type="avatar"
+          currentUrl={avatarUrl}
+          onChange={setAvatarUrl}
+          avatarSize={80}
+        />
       </div>
 
       {/* 닉네임 수정 폼 */}
@@ -76,6 +51,7 @@ export function ProfileSettingsForm({
         action={formAction}
         style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
       >
+        <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <label
             htmlFor="nickname"

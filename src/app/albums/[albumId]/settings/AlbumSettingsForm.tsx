@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Trash2Icon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ImageUploadPicker } from '@/components/ui/ImageUploadPicker'
 import { updateAlbum, requestAlbumDeletion, cancelAlbumDeletion, type UpdateAlbumInput } from '@/actions/album'
 import type { AlbumDetail } from '@/queries/albums'
 
@@ -97,6 +98,7 @@ export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(album.coverImageUrl)
 
   const {
     register,
@@ -115,7 +117,7 @@ export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.
   const onSave = (values: UpdateAlbumInput): void => {
     setIsSaving(true)
     void (async () => {
-      const result = await updateAlbum(album.id, values)
+      const result = await updateAlbum(album.id, { ...values, coverImageUrl })
       if (!result || !result.success) {
         toast.error(result?.error ?? '저장에 실패했어요')
       } else {
@@ -166,6 +168,15 @@ export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
           noValidate
         >
+          {/* 커버 이미지 */}
+          <ImageUploadPicker
+            type="cover"
+            currentUrl={coverImageUrl}
+            onChange={setCoverImageUrl}
+            albumId={album.id}
+            aspectRatio="16/7"
+          />
+
           <Input
             label="여행 이름"
             id="title"

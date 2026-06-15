@@ -38,7 +38,10 @@ export async function createUserProfile(
     return { error: '로그인 세션이 만료되었어요. 다시 로그인해주세요' }
   }
 
+  // Prefer user-uploaded avatar (from form), then Google OAuth avatar
+  const uploadedAvatar = formData.get('avatarUrl')
   const avatarUrl =
+    (typeof uploadedAvatar === 'string' && uploadedAvatar.startsWith('http') ? uploadedAvatar : null) ??
     (user.user_metadata?.avatar_url as string | undefined) ??
     (user.user_metadata?.picture as string | undefined) ??
     null
@@ -77,7 +80,7 @@ export type UpdateProfileState =
   | null
 
 /**
- * Updates the current user's nickname.
+ * Updates the current user's nickname and optionally their avatar URL.
  */
 export async function updateProfile(
   _prevState: UpdateProfileState,
@@ -97,9 +100,18 @@ export async function updateProfile(
     return { success: false, error: '로그인 세션이 만료되었어요. 다시 로그인해주세요' }
   }
 
+  const uploadedAvatar = formData.get('avatarUrl')
+  const avatarUrl =
+    typeof uploadedAvatar === 'string' && uploadedAvatar.startsWith('http')
+      ? uploadedAvatar
+      : undefined
+
   const { error } = await supabase
     .from('users')
-    .update({ nickname: result.data.nickname })
+    .update({
+      nickname: result.data.nickname,
+      ...(avatarUrl !== undefined ? { avatar_url: avatarUrl } : {}),
+    })
     .eq('id', user.id)
 
   if (error) {
