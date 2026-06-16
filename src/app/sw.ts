@@ -24,7 +24,14 @@ const serwist = new Serwist({
       }),
     },
     {
-      // R2 photo thumbnails
+      // Vercel 이미지 최적화 경로 — 실제 화면 사진은 /_next/image 로 나간다
+      matcher: /\/_next\/image\?/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: 'next-image',
+      }),
+    },
+    {
+      // R2 원본 직접 로드(사진 상세 등)
       matcher: new RegExp(`^${process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? 'https://PLACEHOLDER'}`),
       handler: new StaleWhileRevalidate({
         cacheName: 'r2-photos',
