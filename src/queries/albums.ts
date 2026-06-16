@@ -1,5 +1,6 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { useSessionStore } from '@/store/session'
 import { albumKeys } from '@/queries/keys'
 import type { Database } from '@/types/database'
 
@@ -67,12 +68,13 @@ function albumStatusRank(startDate: string, endDate: string): number {
  */
 export function useAlbums(): UseQueryResult<AlbumListItem[]> {
   const supabase = createClient()
+  const userId = useSessionStore((s) => s.user?.id)
 
   return useQuery({
     queryKey: albumKeys.list(),
+    enabled: !!userId,
     queryFn: async (): Promise<AlbumListItem[]> => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return []
+      if (!userId) return []
 
       const { data, error } = await supabase
         .from('album_members')
@@ -90,7 +92,7 @@ export function useAlbums(): UseQueryResult<AlbumListItem[]> {
             members:album_members(count)
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
 
       if (error) throw error
 
@@ -142,12 +144,13 @@ type RawDetailRow = {
  */
 export function useAlbumDetail(albumId: string): UseQueryResult<{ album: AlbumDetail; myRole: MemberRole } | null> {
   const supabase = createClient()
+  const userId = useSessionStore((s) => s.user?.id)
 
   return useQuery({
     queryKey: albumKeys.detail(albumId),
+    enabled: !!userId,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
+      if (!userId) return null
 
       const { data, error } = await supabase
         .from('album_members')
@@ -159,7 +162,7 @@ export function useAlbumDetail(albumId: string): UseQueryResult<{ album: AlbumDe
           )
         `)
         .eq('album_id', albumId)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle()
 
       if (error) throw error
