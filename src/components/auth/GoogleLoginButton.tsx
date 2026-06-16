@@ -1,7 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import {
+  buildExternalBrowserEscape,
+  detectInAppBrowser,
+  type InAppBrowserInfo,
+} from '@/lib/browser/inAppBrowser'
 
 interface GoogleLoginButtonProps {
   next?: string
@@ -9,8 +14,26 @@ interface GoogleLoginButtonProps {
 
 export function GoogleLoginButton({ next }: GoogleLoginButtonProps): React.JSX.Element {
   const [loading, setLoading] = useState(false)
+  const [inApp, setInApp] = useState<InAppBrowserInfo | null>(null)
+  const [showGuide, setShowGuide] = useState(false)
+
+  useEffect(() => {
+    setInApp(detectInAppBrowser(navigator.userAgent))
+  }, [])
 
   async function handleLogin(): Promise<void> {
+    // 인앱 브라우저에서는 구글 OAuth가 차단되므로 외부 브라우저로 유도한다
+    if (inApp?.isInApp) {
+      const escapeUrl = buildExternalBrowserEscape(window.location.href, inApp)
+      if (escapeUrl) {
+        window.location.href = escapeUrl
+        return
+      }
+      // 자동 탈출 불가(iOS 인앱 등) → 수동 안내 노출
+      setShowGuide(true)
+      return
+    }
+
     setLoading(true)
     const supabase = createClient()
     const callbackUrl = new URL('/auth/callback', window.location.origin)
@@ -27,48 +50,139 @@ export function GoogleLoginButton({ next }: GoogleLoginButtonProps): React.JSX.E
     // loading stays true during redirect (no error)
   }
 
+  const isInApp = inApp?.isInApp ?? false
+  const buttonLabel = loading
+    ? '로그인 중...'
+    : isInApp
+      ? '외부 브라우저로 로그인'
+      : 'Google로 계속하기'
+
   return (
-    <button
-      onClick={handleLogin}
-      disabled={loading}
-      aria-label="Google 계정으로 로그인"
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      <button
+        onClick={handleLogin}
+        disabled={loading}
+        aria-label={isInApp ? '외부 브라우저로 로그인' : 'Google 계정으로 로그인'}
+        style={{
+          width: '100%',
+          height: 'var(--touch-comfort)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 'var(--space-3)',
+          backgroundColor: 'var(--color-bg-card)',
+          border: '1.5px solid var(--color-border-strong)',
+          borderRadius: 'var(--radius-md)',
+          fontSize: 'var(--text-base)',
+          fontWeight: 'var(--weight-medium)',
+          color: 'var(--color-ink)',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.65 : 1,
+          transition: `opacity var(--duration-fast)`,
+          boxShadow: 'var(--shadow-xs)',
+        }}
+      >
+        {loading ? (
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              border: '2px solid var(--color-border-strong)',
+              borderTopColor: 'var(--color-amber)',
+              animation: 'spin 0.6s linear infinite',
+              flexShrink: 0,
+            }}
+            aria-hidden="true"
+          />
+        ) : (
+          <GoogleIcon />
+        )}
+        {buttonLabel}
+      </button>
+
+      {isInApp && (
+        <p
+          style={{
+            fontSize: 'var(--text-xs)',
+            color: 'var(--color-ink-muted)',
+            textAlign: 'center',
+            lineHeight: 'var(--leading-loose)',
+          }}
+        >
+          인앱 브라우저에서는 Google 로그인이 제한돼요.
+          <br />
+          기본 브라우저(Chrome·Safari)에서 열어주세요.
+        </p>
+      )}
+
+      {showGuide && inApp && <InAppBrowserGuide info={inApp} onClose={() => setShowGuide(false)} />}
+    </div>
+  )
+}
+
+interface InAppBrowserGuideProps {
+  info: InAppBrowserInfo
+  onClose: () => void
+}
+
+function InAppBrowserGuide({ info, onClose }: InAppBrowserGuideProps): React.JSX.Element {
+  const steps =
+    info.os === 'ios'
+      ? ['화면 우측 하단 또는 상단의 공유/메뉴(⋯) 버튼을 누르세요', "'Safari로 열기'를 선택하세요", '열린 Safari에서 다시 로그인하세요']
+      : ['화면 우측 상단 메뉴(⋮) 버튼을 누르세요', "'다른 브라우저로 열기'를 선택하세요", '열린 브라우저에서 다시 로그인하세요']
+
+  return (
+    <div
+      role="alert"
       style={{
-        width: '100%',
-        height: 'var(--touch-comfort)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 'var(--space-3)',
+        marginTop: 'var(--space-1)',
+        padding: 'var(--space-4)',
         backgroundColor: 'var(--color-bg-card)',
         border: '1.5px solid var(--color-border-strong)',
         borderRadius: 'var(--radius-md)',
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--weight-medium)',
-        color: 'var(--color-ink)',
-        cursor: loading ? 'not-allowed' : 'pointer',
-        opacity: loading ? 0.65 : 1,
-        transition: `opacity var(--duration-fast)`,
         boxShadow: 'var(--shadow-xs)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-3)',
       }}
     >
-      {loading ? (
-        <div
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: '50%',
-            border: '2px solid var(--color-border-strong)',
-            borderTopColor: 'var(--color-amber)',
-            animation: 'spin 0.6s linear infinite',
-            flexShrink: 0,
-          }}
-          aria-hidden="true"
-        />
-      ) : (
-        <GoogleIcon />
-      )}
-      {loading ? '로그인 중...' : 'Google로 계속하기'}
-    </button>
+      <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-medium)', color: 'var(--color-ink)' }}>
+        기본 브라우저에서 열어주세요
+      </p>
+      <ol
+        style={{
+          margin: 0,
+          paddingLeft: 'var(--space-5)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-2)',
+          fontSize: 'var(--text-xs)',
+          color: 'var(--color-ink-muted)',
+          lineHeight: 'var(--leading-loose)',
+        }}
+      >
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      <button
+        onClick={onClose}
+        style={{
+          alignSelf: 'flex-end',
+          height: 'var(--touch-min)',
+          padding: '0 var(--space-3)',
+          background: 'none',
+          border: 'none',
+          fontSize: 'var(--text-xs)',
+          fontWeight: 'var(--weight-medium)',
+          color: 'var(--color-amber)',
+          cursor: 'pointer',
+        }}
+      >
+        확인
+      </button>
+    </div>
   )
 }
 

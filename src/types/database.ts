@@ -273,6 +273,7 @@ export type Database = {
           order_index: number
           place_name: string
           scheduled_time: string | null
+          time_period: string | null
           updated_at: string
         }
         Insert: {
@@ -285,6 +286,7 @@ export type Database = {
           order_index?: number
           place_name: string
           scheduled_time?: string | null
+          time_period?: string | null
           updated_at?: string
         }
         Update: {
@@ -297,6 +299,7 @@ export type Database = {
           order_index?: number
           place_name?: string
           scheduled_time?: string | null
+          time_period?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -399,7 +402,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fn_is_album_host: { Args: { p_album_id: string }; Returns: boolean }
+      fn_is_album_member: { Args: { p_album_id: string }; Returns: boolean }
+      fn_is_album_owner: { Args: { p_album_id: string }; Returns: boolean }
     }
     Enums: {
       member_role: "owner" | "co_host" | "member"

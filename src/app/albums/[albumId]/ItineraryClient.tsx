@@ -8,7 +8,7 @@ import { useAlbumContext } from './AlbumContext'
 import { useItinerary } from '@/queries/itinerary'
 import { DateBar } from '@/components/itinerary/DateBar'
 import { WeatherWidget } from '@/components/itinerary/WeatherWidget'
-import { ItineraryItemCard } from '@/components/itinerary/ItineraryItem'
+import { ItineraryList } from '@/components/itinerary/ItineraryList'
 import { Skeleton } from '@/components/ui/skeleton'
 
 function getInitialDate(startDate: string, endDate: string): string {
@@ -195,20 +195,12 @@ function ItineraryClient(): React.JSX.Element {
         )}
 
         {!isLoading && !isError && items && items.length > 0 && (
-          <div
-            className="timeline"
-            style={{ margin: 'var(--space-4) var(--page-padding) 0' }}
-          >
-            {items.map((item, index) => (
-              <ItineraryItemCard
-                key={item.id}
-                item={item}
-                index={index}
-                canEdit={canEdit}
-                albumId={album.id}
-              />
-            ))}
-          </div>
+          <ItineraryList
+            items={items}
+            canEdit={canEdit}
+            albumId={album.id}
+            date={selectedDate}
+          />
         )}
         </div>
       </main>

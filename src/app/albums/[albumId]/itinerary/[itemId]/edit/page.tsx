@@ -33,7 +33,7 @@ export default async function EditItineraryPage({
 
   const { data: row } = await supabase
     .from('itinerary_items')
-    .select('id, album_id, date, place_name, scheduled_time, memo, order_index, created_by, created_at')
+    .select('id, album_id, date, place_name, scheduled_time, time_period, memo, order_index, created_by, created_at')
     .eq('id', itemId)
     .eq('album_id', albumId)
     .maybeSingle()
@@ -46,6 +46,7 @@ export default async function EditItineraryPage({
     date: row.date,
     placeName: row.place_name,
     scheduledTime: row.scheduled_time?.slice(0, 5) ?? null,
+    timePeriod: row.time_period as ItineraryItem['timePeriod'],
     memo: row.memo,
     orderIndex: row.order_index,
     createdBy: row.created_by,
