@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next'
 import withSerwistInit from '@serwist/next'
 
+// PWA(서비스워커)는 dev에서 비활성(아래 disable)이므로 Turbopack 미지원 경고는 무의미.
+// 크로스플랫폼 위해 스크립트 대신 여기서 환경변수로 경고를 끈다.
+process.env.SERWIST_SUPPRESS_TURBOPACK_WARNING = '1'
+
 const withSerwist = withSerwistInit({
   swSrc: 'src/app/sw.ts',
   swDest: 'public/sw.js',
