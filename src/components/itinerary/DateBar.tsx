@@ -18,8 +18,14 @@ function DateBar({ startDate, endDate, selectedDate, onSelect }: DateBarProps): 
     end: parseISO(endDate),
   })
 
+  const isFill = days.length <= 7
+
   return (
-    <div className="date-bar" role="tablist" aria-label="날짜 선택">
+    <div
+      className={`date-bar${isFill ? ' date-bar--fill' : ''}`}
+      role="tablist"
+      aria-label="날짜 선택"
+    >
       {days.map((day, index) => {
         const dateStr = format(day, 'yyyy-MM-dd')
         const isSelected = dateStr === selectedDate

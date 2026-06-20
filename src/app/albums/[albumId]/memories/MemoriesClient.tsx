@@ -1,13 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { ImageIcon, BookOpenIcon } from 'lucide-react'
-import { format } from 'date-fns'
+import { ImageIcon, BookOpenIcon, PlusIcon } from 'lucide-react'
 import { useAlbumContext } from '../AlbumContext'
+import { useSelectedDate, useDateSwipe } from '../SelectedDateContext'
 import { usePhotos } from '@/queries/photos'
 import { useDiaryEntries } from '@/queries/diary'
 import { PhotoGrid, PhotoGridSkeleton } from '@/components/photo/PhotoGrid'
-import { PhotoUploadButton } from '@/components/photo/PhotoUploadButton'
 import { DiaryCard } from '@/components/diary/DiaryCard'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -95,29 +94,30 @@ function StorageGauge({ usedBytes, limitBytes }: { usedBytes: number; limitBytes
 
 export function MemoriesClient(): React.JSX.Element {
   const { album, myUserId } = useAlbumContext()
-  const today = format(new Date(), 'yyyy-MM-dd')
-  const storageFull = album.storageUsedBytes >= album.storageLimitBytes
+  const { selectedDate } = useSelectedDate()
+  const swipe = useDateSwipe()
 
   const {
-    data: photos,
+    data: allPhotos,
     isLoading: photosLoading,
     isError: photosError,
     refetch: refetchPhotos,
   } = usePhotos(album.id)
 
   const {
-    data: diaryEntries,
+    data: allDiaryEntries,
     isLoading: diaryLoading,
     isError: diaryError,
     refetch: refetchDiary,
   } = useDiaryEntries(album.id)
 
-  const hasWrittenToday = diaryEntries?.some(
-    (e) => e.userId === myUserId && e.date === today,
-  )
+  const photos = allPhotos?.filter((p) => p.date === selectedDate)
+  const diaryEntries = allDiaryEntries?.filter((e) => e.date === selectedDate)
 
   return (
     <main
+      onTouchStart={swipe.onTouchStart}
+      onTouchEnd={swipe.onTouchEnd}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -187,10 +187,10 @@ export function MemoriesClient(): React.JSX.Element {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
               <p className="text-display-sm" style={{ color: 'var(--color-ink)' }}>
-                아직 사진이 없어요
+                이 날은 아직 사진이 없어요
               </p>
               <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)' }}>
-                아래 버튼으로 첫 사진을 올려보세요
+                아래 버튼으로 이 날의 기록을 남겨보세요
               </p>
             </div>
           </div>
@@ -220,19 +220,6 @@ export function MemoriesClient(): React.JSX.Element {
           >
             여행 일기
           </h2>
-          {!hasWrittenToday && (
-            <Link
-              href={`/albums/${album.id}/diary/${today}/edit`}
-              style={{
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-amber)',
-                fontWeight: 500,
-                textDecoration: 'none',
-              }}
-            >
-              + 오늘 일기 쓰기
-            </Link>
-          )}
         </div>
 
         {diaryLoading && <DiarySkeleton />}
@@ -282,10 +269,10 @@ export function MemoriesClient(): React.JSX.Element {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
               <p className="text-display-sm" style={{ color: 'var(--color-ink)' }}>
-                아직 일기가 없어요
+                이 날은 아직 일기가 없어요
               </p>
               <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)' }}>
-                오늘의 여행을 기록해보세요
+                이 날의 여행을 기록해보세요
               </p>
             </div>
           </div>
@@ -305,8 +292,16 @@ export function MemoriesClient(): React.JSX.Element {
         )}
       </section>
 
-      {/* FAB — 사진 업로드 */}
-      <PhotoUploadButton albumId={album.id} disabled={storageFull} />
+      {/* FAB — 선택한 날짜의 기록 작성 (사진 + 일기) */}
+      <div className="fab-container">
+        <Link
+          href={`/albums/${album.id}/diary/${selectedDate}/edit`}
+          className="fab"
+          aria-label="이 날의 기록 작성"
+        >
+          <PlusIcon size={26} color="#FFFFFF" className="fab__icon" />
+        </Link>
+      </div>
 
       {/* 용량 게이지 */}
       <StorageGauge

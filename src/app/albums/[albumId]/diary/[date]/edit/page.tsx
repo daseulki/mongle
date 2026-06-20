@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { DiaryEditForm } from './DiaryEditForm'
+import { PhotoAttachSection } from './PhotoAttachSection'
 import type { DiaryEntry } from '@/queries/diary'
+import type { UploadedPhoto } from '@/queries/usePhotoUpload'
 
 interface Props {
   params: Promise<{ albumId: string; date: string }>
@@ -32,6 +34,17 @@ export default async function DiaryEditPage({ params }: Props): Promise<React.JS
 
   if (!member) notFound()
 
+  const { data: album } = await supabase
+    .from('albums')
+    .select('start_date, end_date')
+    .eq('id', albumId)
+    .maybeSingle()
+
+  if (!album) notFound()
+  if (date < album.start_date || date > album.end_date) {
+    redirect(`/albums/${albumId}/memories`)
+  }
+
   const { data: raw } = await supabase
     .from('diary_entries')
     .select(
@@ -57,16 +70,37 @@ export default async function DiaryEditPage({ params }: Props): Promise<React.JS
     }
   }
 
+  const { data: photoRows } = await supabase
+    .from('photos')
+    .select('id, cdn_url')
+    .eq('album_id', albumId)
+    .eq('uploaded_by', user.id)
+    .eq('date', date)
+    .order('created_at', { ascending: true })
+
+  const initialPhotos: UploadedPhoto[] = (photoRows ?? []).map((p) => ({
+    id: p.id,
+    cdnUrl: p.cdn_url,
+  }))
+
   const displayDate = format(parsedDate, 'M월 d일 (E)', { locale: ko })
 
   return (
     <AppLayout>
       <PageHeader
-        title={`${displayDate} 일기`}
+        title={`${displayDate} 기록`}
         backHref={`/albums/${albumId}/memories`}
         showBack
       />
-      <div style={{ padding: 'var(--space-5) var(--page-padding)' }}>
+      <div
+        style={{
+          padding: 'var(--space-5) var(--page-padding)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-6)',
+        }}
+      >
+        <PhotoAttachSection albumId={albumId} date={date} initialPhotos={initialPhotos} />
         <DiaryEditForm albumId={albumId} date={date} existingEntry={existingEntry} />
       </div>
     </AppLayout>

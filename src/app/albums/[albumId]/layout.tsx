@@ -1,12 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
-import Link from 'next/link'
-import { MoreHorizontalIcon } from 'lucide-react'
-import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { createClient } from '@/lib/supabase/server'
-import { AppLayout } from '@/components/layout/AppLayout'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { AlbumTabNav } from '@/components/album/AlbumTabNav'
 import { AlbumProvider } from './AlbumContext'
+import { AlbumChrome } from './AlbumChrome'
 import type { AlbumDetail, AlbumMember } from '@/queries/albums'
 import type { Database } from '@/types/database'
 
@@ -111,54 +106,7 @@ export default async function AlbumLayout({
         myUserId: user.id,
       }}
     >
-      <AppLayout>
-        <PageHeader
-          title={album.title}
-          backHref="/"
-          showBack
-          rightSlot={
-            <Link
-              href={`/albums/${albumId}/members`}
-              aria-label="멤버 및 설정"
-              style={{
-                width: 'var(--touch-min)',
-                height: 'var(--touch-min)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-full)',
-                color: 'var(--color-ink)',
-              }}
-            >
-              <MoreHorizontalIcon size={20} />
-            </Link>
-          }
-        />
-        {/* M-03 삭제 예정 배너 */}
-        {album.deleteRequestedAt && (() => {
-          const deleteDate = parseISO(album.deleteRequestedAt)
-          deleteDate.setDate(deleteDate.getDate() + 7)
-          const dDay = differenceInCalendarDays(deleteDate, new Date())
-          return (
-            <div
-              role="alert"
-              style={{
-                background: 'var(--color-terracotta)',
-                color: '#fff',
-                fontSize: 'var(--text-xs)',
-                fontWeight: 600,
-                padding: '8px var(--page-padding)',
-                textAlign: 'center',
-                letterSpacing: '0.02em',
-              }}
-            >
-              {dDay <= 0 ? '이 앨범은 곧 삭제돼요' : `이 앨범은 ${dDay}일 후 삭제 예정이에요`}
-            </div>
-          )
-        })()}
-        <AlbumTabNav albumId={albumId} />
-        {children}
-      </AppLayout>
+      <AlbumChrome albumId={albumId}>{children}</AlbumChrome>
     </AlbumProvider>
   )
 }

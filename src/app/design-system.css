@@ -758,6 +758,15 @@ a {
   -webkit-overflow-scrolling: touch;
 }
 
+/* 7일 이하: 가로 폭을 꽉 채워 균등 분배 (스크롤 없음) */
+.date-bar--fill {
+  overflow-x: visible;
+}
+.date-bar--fill .date-chip {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .date-chip {
   flex-shrink: 0;
   display: flex;

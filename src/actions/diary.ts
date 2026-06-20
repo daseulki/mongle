@@ -48,6 +48,17 @@ export async function saveDiary(
 
   if (!member) return { success: false, error: '앨범 멤버만 일기를 쓸 수 있습니다' }
 
+  const { data: album } = await client
+    .from('albums')
+    .select('start_date, end_date')
+    .eq('id', albumId)
+    .maybeSingle()
+
+  if (!album) return { success: false, error: '앨범을 찾을 수 없습니다' }
+  if (date < album.start_date || date > album.end_date) {
+    return { success: false, error: '여행 기간 내의 날짜에만 일기를 쓸 수 있어요' }
+  }
+
   const { error } = await client.from('diary_entries').upsert(
     {
       album_id: albumId,
