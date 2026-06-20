@@ -1,6 +1,6 @@
 # 몽글여행 앱 — 프로젝트 진행 현황 & TODO
 
-> 최종 갱신: 2026-06-14 (TODO-15-1~6 완료) | 기준 정본: PRD v0.7
+> 최종 갱신: 2026-06-15 (S-05·S-07 기획 업데이트 반영) | 기준 정본: PRD v0.7
 
 ---
 
@@ -35,6 +35,8 @@
 | **[TODO-15-4] 날씨 위젯** | classify.ts WMO 매핑·useWeather 훅·WeatherWidget 수평 스트립·ItineraryClient 통합 | `src/lib/weather/classify.ts`, `src/queries/weather.ts`, `src/components/itinerary/WeatherWidget.tsx` |
 | **[TODO-15-5] 사진 상세 뷰** | 풀스크린 뷰어·터치 스와이프·화살표 탐색·다운로드·본인 사진 삭제 모달 | `src/app/albums/[albumId]/photos/[photoId]/page.tsx`, `PhotoDetailClient.tsx` |
 | **[TODO-15-6] 삭제 예정 배너(M-03) & 초대 바텀시트** | layout.tsx M-03 배너·AlbumSettingsForm 삭제 취소 버튼·invite 참여 차단·NewAlbumForm 초대 바텀시트 | `src/app/albums/[albumId]/layout.tsx`, `AlbumSettingsForm.tsx`, `src/app/invite/[token]/page.tsx`, `src/app/albums/new/NewAlbumForm.tsx` |
+| **[TODO-15-P2] 커버·아바타 이미지 업로드** | ImageUploadPicker 공용 컴포넌트·resizeCover/resizeAvatar·images/upload-url API route·NewAlbumForm·AlbumSettingsForm·ProfileForm(온보딩+설정) | `src/components/ui/ImageUploadPicker.tsx`, `src/lib/image/resize.ts`, `src/app/api/images/upload-url/route.ts` |
+| **[TODO-15-P2] 일기 임시 저장 (draft)** | DiaryEditForm localStorage 자동 저장(debounce 1s) + 복원 토스트 | `src/app/albums/[albumId]/diary/[date]/edit/DiaryEditForm.tsx` |
 
 ### TODO-3에서 생성된 파일
 
@@ -111,7 +113,7 @@
 
 ### ✅ [TODO-6] 기본 UI 컴포넌트 (TODO-5와 병행 가능)
 
-> 디자인 토큰: `public/travel-album-design-system.css` 기준
+> 디자인 토큰: `src/app/design-system.css` 기준
 > shadcn-ui 사용해서 컴포넌트 최적화 
 
 - [x] `src/components/ui/Button.tsx` — primary / secondary / ghost 변형 (Base UI, 44px+ 터치타겟, `buttonVariants()` export)
@@ -319,14 +321,36 @@
 - [x] `NewAlbumForm` 저장 성공 시 `generateInviteLink` 즉시 호출 → 초대 링크 바텀시트 자동 노출
 - [x] 바텀시트: 링크 표시·복사 버튼(CheckIcon 전환) + "앨범으로 가기" 버튼
 
-**커버·프로필 이미지 업로드 — P2 (미완, 후속 구현)**
-- [ ] `NewAlbumForm` / `AlbumSettingsForm` — 커버 이미지 업로드 (R2, 1280px 리사이즈, 미선택 시 기본 커버)
-- [ ] `ProfileForm` / `ProfileSettingsForm` — 프로필 이미지 업로드 (256×256 리사이즈)
-- [ ] Google OAuth 아바타 → `avatar_url` 프리필 (온보딩 초기값)
+**커버·프로필 이미지 업로드 — P2 (완료 2026-06-14)**
+- [x] `src/lib/image/resize.ts` — `resizeCover` (1280px), `resizeAvatar` (256px) 추가
+- [x] `src/app/api/images/upload-url/route.ts` — 커버/아바타 presigned URL 발급 (인증만, 용량 미적용)
+- [x] `src/components/ui/ImageUploadPicker.tsx` — cover/avatar 공용 피커 (resize → R2 PUT → CDN URL 반환)
+- [x] `createAlbum` / `updateAlbum` — `coverImageUrl` 파라미터 추가
+- [x] `createUserProfile` / `updateProfile` — `avatarUrl` FormData 필드 추가
+- [x] `NewAlbumForm` / `AlbumSettingsForm` — `ImageUploadPicker` 폼 상단에 통합
+- [x] `ProfileForm` (온보딩) — 아바타 피커 + Google OAuth 아바타 프리필 (`googleAvatarUrl` prop)
+- [x] `ProfileSettingsForm` — 기존 정적 이미지를 클릭 가능한 `ImageUploadPicker`로 교체
 
-**일기 임시 저장 (draft) — P2 (미완, 후속 구현)**
-- [ ] `DiaryEditForm` — `localStorage` draft 자동 저장 (입력 debounce 1s, 키: `draft:diary:{albumId}:{date}`)
-- [ ] 재진입 시 미저장 draft 복원 토스트 제안
+**일기 임시 저장 (draft) — P2 (완료 2026-06-14)**
+- [x] `DiaryEditForm` — `useEffect` + 1s debounce → `localStorage.setItem('draft:diary:{albumId}:{date}', content)`
+- [x] 마운트 시 draft 감지 → Sonner toast "임시 저장된 일기가 있어요" + "불러오기" 액션 버튼
+- [x] 저장/삭제 성공 시 draft 자동 제거
+
+---
+
+### [TODO-15-7] S-05·S-07 기획 업데이트 반영 (일정 탭 인터랙션 보완)
+
+> S-05·S-07 기획 명세서 개정(2026-06-15) 으로 확인된 구현 갭
+
+**S-05 일반 멤버 카드 탭 — 상세 팝업 (신규)**
+- [ ] `src/components/itinerary/ItineraryItem.tsx` — 일반 멤버(`canEdit=false`)가 메모가 긴 카드를 탭 시 단순 상세 팝업 노출
+  - 메모 표시: `line-clamp-2` 로 본문 잘림 처리 (짧으면 팝업 불필요)
+  - 클릭 핸들러: 잘린 경우에만 팝업 open (장소명 + 시간 + 전체 메모 표시)
+  - 팝업 구현: 기존 `dialog.tsx` (Base UI Dialog) 재사용, 읽기 전용
+
+**S-05 Empty 상태 문구 수정**
+- [ ] `src/app/albums/[albumId]/ItineraryClient.tsx` `EmptyItinerary` 컴포넌트
+  - 현재: `"일정이 없어요"` → 스펙 기준: `"이 날의 일정이 없어요"`
 
 ---
 

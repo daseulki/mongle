@@ -196,6 +196,10 @@ body {
   line-height: var(--leading-normal);
   color: var(--color-ink);
   background-color: var(--color-bg-app);
+  /* 단일 굵기(400) 손글씨 폰트라 굵기 토큰이 적용되지 않으므로
+     글자 외곽선으로 획을 두껍게 만들어 가시성 확보 (값 조절 가능: 0.3~0.6px) */
+  -webkit-text-stroke: 0.4px currentColor;
+  paint-order: stroke fill;
   /* iOS Safari 안전 영역 자동 적용 */
   padding-bottom: env(safe-area-inset-bottom);
 }
