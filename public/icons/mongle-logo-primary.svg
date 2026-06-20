@@ -5,7 +5,7 @@
   <style>
     @font-face {
       font-family: 'KyoboHand';
-      src: url('./KyoboHandwriting-subset.woff2') format('woff2');
+      src: url('./KyoboHandwriting.woff2') format('woff2');
       font-display: swap;
     }
     .ko { font-family: 'KyoboHand', cursive; font-size: 56px; fill: #2C2416; }

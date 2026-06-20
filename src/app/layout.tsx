@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { Providers } from '@/components/providers'
+import { BrandLogo } from '@/components/brand-logo'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 const kyoboHandwriting = localFont({
-  src: '../../public/fonts/KyoboHandwriting-subset.woff2',
+  src: '../../public/fonts/KyoboHandwriting.woff2',
   variable: '--font-kyobo',
   weight: '400',
   style: 'normal',
@@ -18,7 +19,6 @@ const kyoboHandwriting = localFont({
 const nanumHandwriting2 = localFont({
   src: '../../public/fonts/나눔손글씨암스테르담.woff2',
   variable: '--font-nanum2',
-
   weight: '400',
   style: 'normal',
   display: 'swap',
@@ -61,12 +61,7 @@ export default function RootLayout({
         <Providers>
           <div className="app-shell">
             <aside className="app-shell__aside" aria-hidden="true">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/icons/mongle-logo-primary.svg"
-                alt=""
-                className="app-shell__logo"
-              />
+              <BrandLogo className="app-shell__logo" />
               <p className="app-shell__tagline">
                 가족·친구와 함께하는
                 <br />

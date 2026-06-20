@@ -7,6 +7,7 @@ import { AlbumCard } from '@/components/album/AlbumCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { MongleMascot } from '@/components/brand-logo'
 
 function AlbumListSkeleton(): React.JSX.Element {
   return (
@@ -124,11 +125,29 @@ export function HomeClient(): React.JSX.Element {
     <AppLayout>
       {/* 헤더 */}
       <header className="page-header">
-        <h1
-          className="text-display-md"
-          style={{ color: 'var(--color-ink)', flex: 1 }}
-        >
-          몽글여행
+        <h1 style={{ flex: 1, margin: 0, display: 'flex', alignItems: 'center' }}>
+          {/* 몽글여행 로고 — 클릭 시 홈(앨범 목록)으로 이동 */}
+          <Link
+            href="/"
+            aria-label="몽글여행 홈"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+            }}
+          >
+            <MongleMascot style={{ height: 50, width: 'auto' }} />
+            <span
+              style={{
+                fontFamily: 'var(--font-kyobo), cursive',
+                fontSize: 'var(--text-d-md)',
+                lineHeight: 1,
+                color: 'var(--color-ink)',
+              }}
+            >
+              몽글여행
+            </span>
+          </Link>
         </h1>
         <Link
           href="/settings/profile"
@@ -143,7 +162,7 @@ export function HomeClient(): React.JSX.Element {
             color: 'var(--color-ink-soft)',
           }}
         >
-          <UserCircleIcon size={24} />
+          <UserCircleIcon size={28} />
         </Link>
       </header>
 

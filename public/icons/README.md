@@ -5,7 +5,7 @@
 - `mongle-mascot.svg` — 몽글이 마스코트 캐릭터 (단독)
 - `mongle-logo-primary.svg` — 메인 로고 (마스코트 + 워드마크)
 - `mongle-icon-app.svg` — 앱 스토어 아이콘 (1024×1024)
-- `KyoboHandwriting-subset.woff2` — 서브셋 폰트 (7.5KB, 웹용)
+- `KyoboHandwriting.woff2` — 서브셋 폰트 (7.5KB, 웹용)
 - `KyoboHandwriting2019.ttf` — 원본 폰트 (7.4MB, 디자인 작업용)
 
 ## 사용법
@@ -15,7 +15,7 @@
 ```css
 @font-face {
   font-family: 'KyoboHand';
-  src: url('/fonts/KyoboHandwriting-subset.woff2') format('woff2');
+  src: url('/fonts/KyoboHandwriting.woff2') format('woff2');
   font-display: swap;
 }
 

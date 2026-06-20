@@ -35,7 +35,7 @@ function PageHeader({
             aria-label="뒤로 가기"
             className="page-header__back"
           >
-            <ChevronLeftIcon size={22} />
+            <ChevronLeftIcon size={28} />
           </Link>
         ) : (
           <button
@@ -44,7 +44,7 @@ function PageHeader({
             aria-label="뒤로 가기"
             className="page-header__back"
           >
-            <ChevronLeftIcon size={22} />
+            <ChevronLeftIcon size={28} />
           </button>
         )
       )}

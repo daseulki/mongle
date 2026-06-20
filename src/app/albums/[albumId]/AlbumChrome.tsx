@@ -51,7 +51,7 @@ export function AlbumChrome({ albumId, children }: AlbumChromeProps): React.JSX.
               color: 'var(--color-ink)',
             }}
           >
-            <MoreHorizontalIcon size={20} />
+            <MoreHorizontalIcon size={28} />
           </Link>
         }
       />
