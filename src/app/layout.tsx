@@ -15,17 +15,6 @@ const kyoboHandwriting = localFont({
 })
 
 
-const nanumHandwriting1 = localFont({
-  src: '../../public/fonts/나눔손글씨느릿느릿체.woff2',
-  variable: '--font-nanum1',
-
-  weight: '400',
-  style: 'normal',
-  display: 'swap',
-  preload: true,
-})
-
-
 const nanumHandwriting2 = localFont({
   src: '../../public/fonts/나눔손글씨암스테르담.woff2',
   variable: '--font-nanum2',
@@ -33,7 +22,7 @@ const nanumHandwriting2 = localFont({
   weight: '400',
   style: 'normal',
   display: 'swap',
-  preload: true,
+  preload: false,
 })
 
 
@@ -66,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${kyoboHandwriting.variable} ${nanumHandwriting1.variable} ${nanumHandwriting2.variable} h-full antialiased`}
+      className={`${kyoboHandwriting.variable} ${nanumHandwriting2.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
