@@ -147,7 +147,9 @@ export type UpdateAlbumState =
   | null
 
 /**
- * Updates album title, date range, and destination. Owner only.
+ * Updates album settings.
+ * - Owner: title, date range, destination, and cover image.
+ * - Co-host: cover image only (other fields are ignored).
  */
 export async function updateAlbum(albumId: string, input: unknown): Promise<UpdateAlbumState> {
   const result = updateAlbumSchema.safeParse(input)
@@ -167,23 +169,29 @@ export async function updateAlbum(albumId: string, input: unknown): Promise<Upda
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!member || member.role !== 'owner') {
+  if (!member || (member.role !== 'owner' && member.role !== 'co_host')) {
     return { success: false, error: '앨범 설정을 변경할 권한이 없어요' }
   }
 
   const { title, startDate, endDate, destinationName, coverImageUrl } = result.data
 
+  // 코호스트는 커버 이미지만 수정할 수 있다. 나머지 필드는 owner 전용.
+  const updatePayload =
+    member.role === 'owner'
+      ? {
+          title,
+          start_date: startDate,
+          end_date: endDate,
+          destination_name: destinationName || null,
+          destination_lat: null,
+          destination_lng: null,
+          ...(coverImageUrl !== undefined ? { cover_image_url: coverImageUrl } : {}),
+        }
+      : { cover_image_url: coverImageUrl ?? null }
+
   const { error } = await client
     .from('albums')
-    .update({
-      title,
-      start_date: startDate,
-      end_date: endDate,
-      destination_name: destinationName || null,
-      destination_lat: null,
-      destination_lng: null,
-      ...(coverImageUrl !== undefined ? { cover_image_url: coverImageUrl } : {}),
-    })
+    .update(updatePayload)
     .eq('id', albumId)
 
   if (error) {

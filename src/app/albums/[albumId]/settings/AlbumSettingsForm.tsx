@@ -14,6 +14,8 @@ import type { AlbumDetail } from '@/queries/albums'
 
 interface AlbumSettingsFormProps {
   album: AlbumDetail
+  /** Owner는 모든 항목을, 코호스트는 커버 이미지만 수정할 수 있다. */
+  isOwner: boolean
 }
 
 function DeleteConfirmModal({
@@ -92,7 +94,7 @@ function DeleteConfirmModal({
   )
 }
 
-export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.Element {
+export function AlbumSettingsForm({ album, isOwner }: AlbumSettingsFormProps): React.JSX.Element {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -177,83 +179,88 @@ export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.
             aspectRatio="16/7"
           />
 
-          <Input
-            label="여행 이름"
-            id="title"
-            type="text"
-            placeholder="30자 이하"
-            maxLength={30}
-            error={errors.title?.message}
-            {...register('title', {
-              required: '여행 이름을 입력해주세요',
-              maxLength: { value: 30, message: '30자 이하로 입력해주세요' },
-            })}
-          />
-
-          <Input
-            label="목적지"
-            id="destinationName"
-            type="text"
-            placeholder="선택 사항"
-            maxLength={50}
-            error={errors.destinationName?.message}
-            {...register('destinationName', {
-              maxLength: { value: 50, message: '50자 이하로 입력해주세요' },
-            })}
-          />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            <label
-              style={{
-                fontSize: 'var(--text-sm)',
-                fontWeight: 500,
-                color: 'var(--color-ink-soft)',
-              }}
-            >
-              여행 기간
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <input
-                id="startDate"
-                type="date"
-                className="form-input"
-                style={{ flex: 1 }}
-                {...register('startDate', { required: '시작일을 선택해주세요' })}
-              />
-              <span style={{ color: 'var(--color-ink-muted)', flexShrink: 0 }}>~</span>
-              <input
-                id="endDate"
-                type="date"
-                className="form-input"
-                style={{ flex: 1 }}
-                {...register('endDate', {
-                  required: '종료일을 선택해주세요',
-                  validate: (v) => {
-                    const start = getValues('startDate')
-                    if (v < start) return '종료일이 시작일보다 빨라요'
-                    if (differenceInCalendarDays(parseISO(v), parseISO(start)) > 30)
-                      return '최대 30일이에요'
-                    return true
-                  },
+          {isOwner && (
+            <>
+              <Input
+                label="여행 이름"
+                id="title"
+                type="text"
+                placeholder="30자 이하"
+                maxLength={30}
+                error={errors.title?.message}
+                {...register('title', {
+                  required: '여행 이름을 입력해주세요',
+                  maxLength: { value: 30, message: '30자 이하로 입력해주세요' },
                 })}
               />
-            </div>
-            {(errors.startDate || errors.endDate) && (
-              <p
-                role="alert"
-                style={{ fontSize: 'var(--text-xs)', color: 'var(--color-terracotta)' }}
-              >
-                {errors.startDate?.message ?? errors.endDate?.message}
-              </p>
-            )}
-          </div>
+
+              <Input
+                label="목적지"
+                id="destinationName"
+                type="text"
+                placeholder="선택 사항"
+                maxLength={50}
+                error={errors.destinationName?.message}
+                {...register('destinationName', {
+                  maxLength: { value: 50, message: '50자 이하로 입력해주세요' },
+                })}
+              />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                <label
+                  style={{
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: 500,
+                    color: 'var(--color-ink-soft)',
+                  }}
+                >
+                  여행 기간
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <input
+                    id="startDate"
+                    type="date"
+                    className="form-input"
+                    style={{ flex: 1 }}
+                    {...register('startDate', { required: '시작일을 선택해주세요' })}
+                  />
+                  <span style={{ color: 'var(--color-ink-muted)', flexShrink: 0 }}>~</span>
+                  <input
+                    id="endDate"
+                    type="date"
+                    className="form-input"
+                    style={{ flex: 1 }}
+                    {...register('endDate', {
+                      required: '종료일을 선택해주세요',
+                      validate: (v) => {
+                        const start = getValues('startDate')
+                        if (v < start) return '종료일이 시작일보다 빨라요'
+                        if (differenceInCalendarDays(parseISO(v), parseISO(start)) > 30)
+                          return '최대 30일이에요'
+                        return true
+                      },
+                    })}
+                  />
+                </div>
+                {(errors.startDate || errors.endDate) && (
+                  <p
+                    role="alert"
+                    style={{ fontSize: 'var(--text-xs)', color: 'var(--color-terracotta)' }}
+                  >
+                    {errors.startDate?.message ?? errors.endDate?.message}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
           <Button type="submit" disabled={isSaving} style={{ width: '100%' }}>
             {isSaving ? '저장 중...' : '저장'}
           </Button>
         </form>
 
-        {/* 위험 구역 */}
+        {/* 위험 구역 — owner 전용 */}
+        {isOwner && (
         <div
           style={{
             marginTop: 'var(--space-4)',
@@ -317,6 +324,7 @@ export function AlbumSettingsForm({ album }: AlbumSettingsFormProps): React.JSX.
             </>
           )}
         </div>
+        )}
       </main>
 
       {showDeleteModal && (

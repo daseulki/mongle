@@ -33,9 +33,11 @@ export default async function AlbumSettingsPage({
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!member || member.role !== 'owner') {
+  if (!member || (member.role !== 'owner' && member.role !== 'co_host')) {
     redirect(`/albums/${albumId}`)
   }
+
+  const isOwner = member.role === 'owner'
 
   type RawAlbum = {
     id: string
@@ -72,7 +74,7 @@ export default async function AlbumSettingsPage({
         backHref={`/albums/${albumId}/members`}
         showBack
       />
-      <AlbumSettingsForm album={album} />
+      <AlbumSettingsForm album={album} isOwner={isOwner} />
     </AppLayout>
   )
 }

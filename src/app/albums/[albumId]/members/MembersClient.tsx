@@ -454,8 +454,8 @@ export function MembersClient(): React.JSX.Element {
         </section>
       )}
 
-      {/* 앨범 설정 — owner 전용 */}
-      {myRole === 'owner' && (
+      {/* 앨범 설정 — owner/co_host (코호스트는 커버만 수정 가능) */}
+      {canManageInvite && (
         <section style={{ marginTop: 'var(--space-6)' }}>
           <Link
             href={`/albums/${album.id}/settings`}

@@ -49,19 +49,24 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   let storageKey: string
 
   if (type === 'cover') {
-    if (!albumId) return NextResponse.json({ error: 'albumId가 필요합니다' }, { status: 400 })
+    if (albumId) {
+      // 기존 앨범 커버 변경: 멤버 권한 검증
+      const { data: member } = await supabase
+        .from('album_members')
+        .select('role')
+        .eq('album_id', albumId)
+        .eq('user_id', user.id)
+        .maybeSingle()
 
-    const { data: member } = await supabase
-      .from('album_members')
-      .select('role')
-      .eq('album_id', albumId)
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    if (!member || (member.role !== 'owner' && member.role !== 'co_host')) {
-      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
+      if (!member || (member.role !== 'owner' && member.role !== 'co_host')) {
+        return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
+      }
+      storageKey = `covers/${albumId}/${Date.now()}.jpg`
+    } else {
+      // 새 앨범 생성 플로우: 앨범이 아직 없으므로 사용자별 임시 경로에 업로드.
+      // 인증된 사용자만 도달하며, createAlbum 시 이 URL이 앨범에 저장된다.
+      storageKey = `covers/_pending/${user.id}/${Date.now()}.jpg`
     }
-    storageKey = `covers/${albumId}/${Date.now()}.jpg`
   } else {
     storageKey = `avatars/${user.id}/${Date.now()}.jpg`
   }

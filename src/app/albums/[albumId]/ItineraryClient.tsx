@@ -98,15 +98,15 @@ function ItineraryClient(): React.JSX.Element {
   const { album, myRole } = useAlbumContext()
   const canEdit = myRole === 'owner' || myRole === 'co_host'
 
-  const { selectedDate, dateList } = useSelectedDate()
+  const { selectedDate } = useSelectedDate()
   const swipe = useDateSwipe()
 
   const { data: items, isLoading, isError, refetch } = useItinerary(album.id, selectedDate)
 
   return (
     <>
-      {/* 날씨 위젯 */}
-      <WeatherWidget albumId={album.id} dates={dateList} />
+      {/* 선택한 날짜의 날씨 */}
+      <WeatherWidget albumId={album.id} selectedDate={selectedDate} />
 
       {/* 일정 목록 */}
       <main
