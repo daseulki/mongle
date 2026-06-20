@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { ImageResponse } from 'next/og'
 
 /**
@@ -5,21 +6,19 @@ import { ImageResponse } from 'next/og'
  *
  * ImageResponse(Satori)는 한글을 시스템 폰트로 렌더하지 못하므로 폰트 데이터를
  * 직접 주입해야 하고, WOFF2는 지원하지 않는다. 따라서 TTF(KyoboHandwriting2019)를
- * 사용한다. 에셋은 import.meta.url 기준 상대 경로로 fetch 해야 번들 트레이싱에 포함된다.
+ * 사용한다. 로컬 에셋은 fetch(file://)가 Turbopack 빌드에서 미지원이므로 fs로 읽고,
+ * new URL(..., import.meta.url)로 경로를 잡아 번들 트레이싱에 포함시킨다.
  */
 
+export const runtime = 'nodejs'
 export const alt = '몽글여행 — 가족·친구와 함께하는 여행 앨범 & 일정 앱'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default async function Image(): Promise<ImageResponse> {
   const [kyoboFont, mascotSvg] = await Promise.all([
-    fetch(new URL('../../public/icons/KyoboHandwriting2019.ttf', import.meta.url)).then((res) =>
-      res.arrayBuffer(),
-    ),
-    fetch(new URL('../../public/icons/mongle-mascot.svg', import.meta.url)).then((res) =>
-      res.text(),
-    ),
+    readFile(new URL('../../public/icons/KyoboHandwriting2019.ttf', import.meta.url)),
+    readFile(new URL('../../public/icons/mongle-mascot.svg', import.meta.url), 'utf-8'),
   ])
 
   const mascotDataUri = `data:image/svg+xml;base64,${Buffer.from(mascotSvg).toString('base64')}`
