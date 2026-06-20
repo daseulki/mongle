@@ -185,7 +185,8 @@
 }
 
 html {
-  font-size: 16px;
+  /* 기준 폰트 사이즈 — rem 기반 텍스트 토큰 전체가 이 값에 비례 (조절 가능) */
+  font-size: 18px;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
