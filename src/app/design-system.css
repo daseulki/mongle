@@ -853,7 +853,7 @@ a {
 }
 .page-header__back:active { background: var(--color-bg-surface); }
 
-.page-header__title, .page-header h1 {
+.page-header__title, .page-header span {
   font-family: var(--font-header);
   font-size: var(--text-d-lg);
   font-weight: var(--weight-regular);

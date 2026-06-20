@@ -137,9 +137,16 @@ export function HomeClient(): React.JSX.Element {
             }}
           >
             <MongleMascot style={{ height: 50, width: 'auto' }} />
-            <h1>
+            <span
+              style={{
+                fontFamily: 'var(--font-kyobo), cursive',
+                fontSize: 'var(--text-d-md)',
+                lineHeight: 1,
+                color: 'var(--color-ink)',
+              }}
+            >
               몽글여행
-            </h1>
+            </span>
           </Link>
         </h1>
         <Link

@@ -26,17 +26,38 @@ const nanumHandwriting2 = localFont({
 })
 
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mongle-rose.vercel.app'
+
+const appTitle = '몽글여행'
+const appDescription = '가족·친구와 함께하는 여행 앨범 & 일정 앱'
+
 export const metadata: Metadata = {
-  title: '몽글여행',
-  description: '가족·친구와 함께하는 여행 앨범 & 일정 앱',
+  metadataBase: new URL(siteUrl),
+  title: appTitle,
+  description: appDescription,
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: '몽글여행',
+    title: appTitle,
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: appTitle,
+    title: appTitle,
+    description: appDescription,
+    url: '/',
+    // og:image는 app/opengraph-image.tsx 파일 컨벤션이 자동 생성
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: appTitle,
+    description: appDescription,
+    // twitter:image는 app/twitter-image.tsx 파일 컨벤션이 자동 생성
   },
 }
 
