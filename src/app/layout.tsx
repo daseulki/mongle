@@ -57,8 +57,25 @@ export default function RootLayout({
       lang="ko"
       className={`${kyoboHandwriting.variable} ${nanumHandwriting2.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+      <body className="min-h-full">
+        <Providers>
+          <div className="app-shell">
+            <aside className="app-shell__aside" aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icons/mongle-logo-primary.svg"
+                alt=""
+                className="app-shell__logo"
+              />
+              <p className="app-shell__tagline">
+                가족·친구와 함께하는
+                <br />
+                여행 앨범 &amp; 일정
+              </p>
+            </aside>
+            <div className="app-shell__frame">{children}</div>
+          </div>
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>

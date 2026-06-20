@@ -137,3 +137,74 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ─────────────────────────────────────────
+   App Shell — 데스크탑 좌우 분할 레이아웃
+   모바일(<1024px): 프레임이 화면을 꽉 채움 (기존과 동일)
+   데스크탑(≥1024px): 우측에 모바일 프레임을 뷰포트 가장자리에 붙이고
+                      좌측 남는 공간을 브랜드 장식 패널로 채움.
+   프레임을 우측 가장자리에 두면 우측 기준 고정 요소(FAB 등)가
+   별도 보정 없이 프레임 가장자리와 자연스럽게 정렬된다.
+   ───────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.app-shell__aside {
+  display: none;
+}
+
+.app-shell__frame {
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-app);
+}
+
+@media (min-width: 1024px) {
+  .app-shell__aside {
+    flex: 1 1 0;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-10);
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 25% 15%, var(--color-bg-amber-pale) 0%, transparent 55%),
+      linear-gradient(155deg, var(--color-amber-light) 0%, var(--color-bg-surface) 55%, var(--color-bg-app) 100%);
+  }
+
+  .app-shell__logo {
+    width: min(360px, 70%);
+    height: auto;
+    filter: drop-shadow(var(--shadow-sm));
+  }
+
+  .app-shell__tagline {
+    font-family: var(--font-display);
+    font-size: var(--text-d-sm);
+    color: var(--color-ink-soft);
+    text-align: center;
+    line-height: var(--leading-normal);
+  }
+
+  .app-shell__frame {
+    /* 큰 타이포(18px 루트)에 맞춰 일반 모바일 컬럼보다 약간 넓게.
+       화면 폭에 따라 480→560px로 부드럽게 확장 (리플로우 없는 단일 컬럼의
+       현실적 상한). 더 넓히려면 폭만 키우지 말고 레이아웃 재구성이 필요. */
+    flex: 0 0 auto;
+    width: clamp(480px, 36vw, 560px);
+    max-width: 100%;
+    border-left: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-lg);
+  }
+}
